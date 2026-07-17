@@ -279,15 +279,6 @@ footer .f-sub{color:rgba(255,255,255,0.6);font-size:.78rem}
     <div class="ble-badge" id="bleBadge"><i class="fas fa-plug"></i> <span id="bleLabel">USB Disconnected</span></div>
     <button class="btn btn-primary btn-sm" id="btnBleConnect" onclick="connectSerial()"><i class="fas fa-plug"></i> Connect Device</button>
     <button class="btn btn-coral btn-sm hidden" id="btnBleDisconnect" onclick="disconnectSerial()"><i class="fas fa-times"></i> Disconnect</button>
-    <!-- Sensor Default Distance -->
-    <div style="display:flex;align-items:center;gap:8px;background:var(--amber-light);border:1.5px solid var(--amber);border-radius:10px;padding:7px 14px">
-      <i class="fas fa-ruler-vertical" style="color:var(--amber);font-size:15px"></i>
-      <label style="font-size:.8rem;font-weight:700;color:#92400E;white-space:nowrap">Set Sensor Default Distance (cm)</label>
-      <input type="number" id="sensorDefaultDist" min="50" max="500" step="0.5" placeholder="e.g. 240"
-        style="width:90px;padding:5px 10px;border:1.5px solid var(--amber);border-radius:7px;font-family:'Inter',sans-serif;font-size:.88rem;outline:none;background:#fff;color:var(--text)"
-        oninput="saveSensorDefault()" title="Enter the fixed distance from sensor to floor (cm)"/>
-      <span id="sensorDefaultStatus" style="font-size:.75rem;color:#92400E;font-weight:600"></span>
-    </div>
     <div class="spacer"></div>
     <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
     <button class="btn btn-coral btn-sm" onclick="exportAdminPDF()"><i class="fas fa-file-pdf"></i> Export PDF</button>
@@ -436,14 +427,11 @@ footer .f-sub{color:rgba(255,255,255,0.6);font-size:.78rem}
         <div class="lcd-row">│ <span id="lcdName">--------</span>      │</div>
         <div class="lcd-row">└──────────────────┘</div>
       </div>
-      <div id="infoUseDefault" style="background:var(--mint-light);border:1px solid var(--mint);border-radius:10px;padding:14px 16px;margin:12px 0;font-size:.88rem;color:#065F46">
-        <i class="fas fa-check-circle" style="color:var(--mint)"></i> <strong>Using Default Distance:</strong> Sensor default distance is set to <strong id="infoDefaultVal">—</strong> cm. The person should stand directly under the sensor. Click <strong>Start Measurement</strong>.
-      </div>
-      <div id="infoNoDefault" style="background:var(--blue-light);border:1px solid var(--blue);border-radius:10px;padding:14px 16px;margin:12px 0;font-size:.88rem;color:#1E3A8A">
-        <i class="fas fa-info-circle" style="color:var(--blue)"></i> <strong>No Default Set — Auto Calibrate:</strong> Make sure <u>nobody is under the sensor</u>. Click <strong>Start Measurement</strong> — the sensor will measure the floor distance first, then ask the person to step in.
+      <div style="background:var(--blue-light);border:1px solid var(--blue);border-radius:10px;padding:14px 16px;margin:12px 0;font-size:.88rem;color:#1E3A8A">
+        <i class="fas fa-info-circle" style="color:var(--blue)"></i> <strong>Step 1 — Calibrate:</strong> Make sure <u>nobody is under the sensor</u>. Click <strong>Measure</strong> — the sensor will calculate the floor distance first. The LCD will show <em>"Wait, Calculating…"</em>
       </div>
       <div style="background:var(--amber-light);border:1px solid var(--amber);border-radius:10px;padding:14px 16px;margin:8px 0 12px;font-size:.88rem;color:#92400E">
-        <i class="fas fa-walking" style="color:var(--amber)"></i> <strong>Person:</strong> Ask them to stand directly under the sensor, upright, without shoes, and stay still.
+        <i class="fas fa-walking" style="color:var(--amber)"></i> <strong>Step 2 — Person walks in:</strong> Once LCD shows <em>"Come Forward"</em>, ask the person to stand directly under the sensor upright, without shoes.
       </div>
       <div class="lcd-preview" id="lcdReady">
         <div class="lcd-row">│ Wait, Calculating│</div>
@@ -505,7 +493,6 @@ let isConnected=false, allRecords=[], currentMeasuredHeight=null;
 let currentName='', currentGender='';
 let barChartInst=null,pieChartInst=null,lineChartInst=null,groupBarInst=null;
 let chartsVisible=false, chatbotVisible=false;
-let sensorDefaultDistCM = null; // admin-set sensor-to-floor default distance
 
 // ── Toast ──
 function toast(msg, type='info'){
@@ -514,25 +501,6 @@ function toast(msg, type='info'){
   el.innerHTML=`<i class="fas fa-${type==='success'?'check-circle':type==='error'?'times-circle':'info-circle'}"></i> ${msg}`;
   document.body.appendChild(el);
   setTimeout(()=>el.remove(),3200);
-}
-
-// ── Sensor Default Distance ──
-function saveSensorDefault(){
-  const val = parseFloat(document.getElementById('sensorDefaultDist').value);
-  const statusEl = document.getElementById('sensorDefaultStatus');
-  if(!isNaN(val) && val >= 50 && val <= 500){
-    sensorDefaultDistCM = val;
-    statusEl.textContent = '✓ Saved';
-    statusEl.style.color = '#065F46';
-    toast('Sensor default distance set to '+val+' cm','success');
-  } else if(document.getElementById('sensorDefaultDist').value === ''){
-    sensorDefaultDistCM = null;
-    statusEl.textContent = '';
-  } else {
-    sensorDefaultDistCM = null;
-    statusEl.textContent = '✗ Invalid';
-    statusEl.style.color = '#dc2626';
-  }
 }
 
 // ── Modal helpers ──
@@ -630,25 +598,10 @@ async function readSerialLoop(){
       buffer = lines.pop(); // keep incomplete last line
       for(const line of lines){
         const text = line.trim();
-        if(text.startsWith('DIST:')){
-          // Arduino sent raw sensor-to-head distance; compute height using admin default
-          const rawDist = parseFloat(text.substring(5));
-          if(!isNaN(rawDist) && sensorDefaultDistCM !== null){
-            const height = parseFloat((sensorDefaultDistCM - rawDist).toFixed(1));
-            if(height > 50 && height < 260){
-              currentMeasuredHeight = height;
-              showHeightResult(height);
-            } else {
-              toast('Computed height out of range ('+height+' cm). Check default distance.','error');
-            }
-          }
-        } else {
-          // Legacy plain number (auto-calibrated height already computed by Arduino)
-          const cm = parseFloat(text);
-          if(!isNaN(cm) && cm > 0){
-            currentMeasuredHeight = cm;
-            showHeightResult(cm);
-          }
+        const cm = parseFloat(text);
+        if(!isNaN(cm) && cm > 0){
+          currentMeasuredHeight = cm;
+          showHeightResult(cm);
         }
       }
     }
@@ -670,11 +623,6 @@ function openHeightPopup(){
   document.getElementById('step1Err').classList.add('hidden');
   gotoStepNum(1);
   currentMeasuredHeight=null;
-  // Update Step 2 info banners
-  const hasDefault = sensorDefaultDistCM !== null;
-  document.getElementById('infoUseDefault').style.display = hasDefault ? 'block' : 'none';
-  document.getElementById('infoNoDefault').style.display = hasDefault ? 'none' : 'block';
-  if(hasDefault) document.getElementById('infoDefaultVal').textContent = sensorDefaultDistCM;
   openModal('heightModal');
 }
 function gotoStepNum(n){
@@ -699,23 +647,12 @@ function startMeasuring(){
   document.getElementById('measuringAnim').classList.remove('hidden');
   document.getElementById('resultDiv').classList.add('hidden');
   if(isConnected){
-    if(sensorDefaultDistCM !== null){
-      // Send default distance so Arduino skips auto-calibration
-      sendSerialCmd('SETDIST:'+sensorDefaultDistCM.toFixed(1));
-    }
     sendSerialCmd('MEASURE');
   } else {
-    // Demo mode simulation when not connected
+    // Demo mode simulation when BLE not connected
     setTimeout(()=>{
-      let demo;
-      if(sensorDefaultDistCM !== null){
-        // Simulate: raw sensor reads head ~70cm from sensor, height = default - 70
-        const fakeRaw = 60 + Math.random()*20;
-        demo = parseFloat((sensorDefaultDistCM - fakeRaw).toFixed(1));
-      } else {
-        demo = Math.floor(Math.random()*50)+140;
-      }
-      currentMeasuredHeight = demo;
+      const demo=Math.floor(Math.random()*50)+140;
+      currentMeasuredHeight=demo;
       showHeightResult(demo);
     },2800);
   }
