@@ -219,7 +219,7 @@ footer .f-sub{color:rgba(255,255,255,0.6);font-size:.78rem}
   <div class="navbar-right">
     <div class="ble-status" id="navBleStatus">
       <div class="ble-dot" id="navBleDot"></div>
-      <span id="navBleText">USB Not Connected</span>
+      <span id="navBleText">Not Connected</span>
     </div>
     <button class="btn-nav hidden" id="navLogout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </div>
@@ -228,7 +228,7 @@ footer .f-sub{color:rgba(255,255,255,0.6);font-size:.78rem}
 <!-- ═══════════════ LANDING PAGE ═══════════════ -->
 <div id="landingPage">
   <div class="landing-inner">
-    <div class="landing-badge"><i class="fas fa-plug"></i> USB Serial Powered · Real-Time Measurement</div>
+    <div class="landing-badge"><i class="fas fa-wifi"></i> Bluetooth Powered · Real-Time Measurement</div>
     <h1 class="landing-title">Height Measurement<br>System</h1>
     <p class="landing-sub">Precision anthropometric measurement powered by ESP32 & ultrasonic sensing</p>
     <p class="landing-by">By</p>
@@ -271,11 +271,11 @@ footer .f-sub{color:rgba(255,255,255,0.6);font-size:.78rem}
     <div class="stat-card purple"><div class="stat-label"><i class="fas fa-venus"></i> Female Count</div><div class="stat-value" id="statFemale">0</div></div>
   </div>
 
-  <!-- USB Serial Actions Bar -->
+  <!-- BLE Actions Bar -->
   <div class="actions-bar">
-    <div class="ble-badge" id="bleBadge"><i class="fas fa-plug"></i> <span id="bleLabel">USB Disconnected</span></div>
-    <button class="btn btn-primary btn-sm" id="btnBleConnect" onclick="connectSerial()"><i class="fas fa-plug"></i> Connect Device</button>
-    <button class="btn btn-coral btn-sm hidden" id="btnBleDisconnect" onclick="disconnectSerial()"><i class="fas fa-times"></i> Disconnect</button>
+    <div class="ble-badge" id="bleBadge"><i class="fab fa-bluetooth-b"></i> <span id="bleLabel">BLE Disconnected</span></div>
+    <button class="btn btn-primary btn-sm" id="btnBleConnect" onclick="connectBLE()"><i class="fab fa-bluetooth"></i> Connect Device</button>
+    <button class="btn btn-coral btn-sm hidden" id="btnBleDisconnect" onclick="disconnectBLE()"><i class="fas fa-times"></i> Disconnect</button>
     <div class="spacer"></div>
     <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
   </div>
@@ -460,7 +460,7 @@ footer .f-sub{color:rgba(255,255,255,0.6);font-size:.78rem}
 <!-- ════ FOOTER ════ -->
 <footer>
   <div class="f-logo">CognoSpace</div>
-  <div class="f-sub">Designed & Developed by <strong style="color:rgba(255,255,255,.9)">CognoSpace</strong> · Height Measurement System · Powered by ESP32 USB Serial</div>
+  <div class="f-sub">Designed & Developed by <strong style="color:rgba(255,255,255,.9)">CognoSpace</strong> · Height Measurement System · Powered by ESP32 BLE</div>
 </footer>
 
 <!-- ════ FIREBASE + APP LOGIC ════ -->
@@ -478,10 +478,12 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ── USB Serial Config ──
-const SERIAL_BAUD_RATE = 115200;
+// ── BLE Config ──
+const BLE_SERVICE_UUID    = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
+const BLE_CHAR_HEIGHT_UUID= 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
+const BLE_CHAR_CMD_UUID   = 'beb5483e-36e1-4688-b7f5-ea07361b26a9';
 
-let serialPort=null, serialReader=null, serialWriter=null, serialReadLoop=null;
+let bleDevice=null, bleServer=null, heightChar=null, cmdChar=null;
 let isConnected=false, allRecords=[], currentMeasuredHeight=null;
 let currentName='', currentGender='';
 let barChartInst=null,pieChartInst=null,lineChartInst=null,groupBarInst=null;
@@ -539,73 +541,54 @@ function logout(){
   document.getElementById('userResult').classList.add('hidden');
 }
 
-// ── USB Serial ──
-async function connectSerial(){
-  if(!('serial' in navigator)){
-    toast('Web Serial API not supported. Use Chrome/Edge on desktop.','error');
-    return;
-  }
+// ── BLE ──
+async function connectBLE(){
   try {
-    toast('Select your CognoSpace HMS USB port...','info');
-    serialPort = await navigator.serial.requestPort();
-    await serialPort.open({ baudRate: SERIAL_BAUD_RATE });
-    serialWriter = serialPort.writable.getWriter();
-    setSerialConnected(true);
+    toast('Scanning for CognoSpace HMS...','info');
+    bleDevice = await navigator.bluetooth.requestDevice({
+      filters:[{name:'CognoSpace HMS'}],
+      optionalServices:[BLE_SERVICE_UUID]
+    });
+    bleDevice.addEventListener('gattserverdisconnected', onBLEDisconnect);
+    bleServer = await bleDevice.gatt.connect();
+    const svc = await bleServer.getPrimaryService(BLE_SERVICE_UUID);
+    heightChar = await svc.getCharacteristic(BLE_CHAR_HEIGHT_UUID);
+    cmdChar    = await svc.getCharacteristic(BLE_CHAR_CMD_UUID);
+    await heightChar.startNotifications();
+    heightChar.addEventListener('characteristicvaluechanged', onHeightData);
+    setBLEConnected(true);
     toast('Connected to CognoSpace HMS!','success');
-    // Start reading loop
-    serialReadLoop = readSerialLoop();
   } catch(e) {
-    if(e.name!=='NotFoundError') toast('Serial Error: '+e.message,'error');
+    if(e.name!=='NotFoundError') toast('BLE Error: '+e.message,'error');
   }
 }
-async function disconnectSerial(){
-  try {
-    if(serialReadLoop) { serialReadLoop=null; }
-    if(serialReader) { await serialReader.cancel(); serialReader=null; }
-    if(serialWriter) { serialWriter.releaseLock(); serialWriter=null; }
-    if(serialPort) { await serialPort.close(); serialPort=null; }
-  } catch(e){}
-  setSerialConnected(false);
-  toast('Device disconnected','error');
+function disconnectBLE(){
+  if(bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect();
+  setBLEConnected(false);
 }
-function setSerialConnected(c){
+function onBLEDisconnect(){setBLEConnected(false); toast('Device disconnected','error')}
+function setBLEConnected(c){
   isConnected=c;
   document.getElementById('navBleDot').className='ble-dot'+(c?' connected':'');
   document.getElementById('navBleText').textContent=c?'CognoSpace HMS':'Not Connected';
   document.getElementById('bleBadge').className='ble-badge'+(c?' connected':'');
-  document.getElementById('bleLabel').textContent=c?'USB Connected':'USB Disconnected';
+  document.getElementById('bleLabel').textContent=c?'BLE Connected':'BLE Disconnected';
   document.getElementById('btnBleConnect').classList.toggle('hidden',c);
   document.getElementById('btnBleDisconnect').classList.toggle('hidden',!c);
 }
-async function readSerialLoop(){
-  const decoder = new TextDecoderStream();
-  const inputDone = serialPort.readable.pipeTo(decoder.writable);
-  serialReader = decoder.readable.getReader();
-  let buffer = '';
-  try {
-    while(serialPort && serialPort.readable){
-      const { value, done } = await serialReader.read();
-      if(done) break;
-      buffer += value;
-      let lines = buffer.split('\n');
-      buffer = lines.pop(); // keep incomplete last line
-      for(const line of lines){
-        const text = line.trim();
-        const cm = parseFloat(text);
-        if(!isNaN(cm) && cm > 0){
-          currentMeasuredHeight = cm;
-          showHeightResult(cm);
-        }
-      }
-    }
-  } catch(e){
-    if(isConnected) { setSerialConnected(false); toast('Serial connection lost','error'); }
+function onHeightData(evt){
+  const val=evt.target.value;
+  const text=new TextDecoder().decode(val).trim();
+  const cm=parseFloat(text);
+  if(!isNaN(cm) && cm>0){
+    currentMeasuredHeight=cm;
+    showHeightResult(cm);
   }
 }
-async function sendSerialCmd(cmd){
-  if(serialWriter){
-    const enc = new TextEncoder().encode(cmd+'\n');
-    await serialWriter.write(enc);
+async function sendBLECmd(cmd){
+  if(cmdChar){
+    const enc=new TextEncoder().encode(cmd);
+    await cmdChar.writeValue(enc);
   }
 }
 
@@ -632,7 +615,7 @@ function gotoStep2(){
   currentName=name; currentGender=gender;
   const nameShort=name.length>14?name.substring(0,14):name;
   document.getElementById('lcdName').textContent=nameShort.padEnd(14);
-  if(isConnected) sendSerialCmd('NAME:'+name+','+gender);
+  if(isConnected) sendBLECmd('NAME:'+name+','+gender);
   gotoStepNum(2);
 }
 function startMeasuring(){
@@ -640,7 +623,7 @@ function startMeasuring(){
   document.getElementById('measuringAnim').classList.remove('hidden');
   document.getElementById('resultDiv').classList.add('hidden');
   if(isConnected){
-    sendSerialCmd('MEASURE');
+    sendBLECmd('MEASURE');
   } else {
     // Demo mode simulation when BLE not connected
     setTimeout(()=>{
