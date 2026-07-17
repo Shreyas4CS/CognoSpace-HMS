@@ -1,22 +1,7 @@
 /*
  * ═══════════════════════════════════════════════════════════════
  *  CognoSpace Height Measurement System (HMS)
- *  ESP32 Serial Firmware v2.0 (converted from BLE)
- * 
- *  Hardware:
- *   - ESP32 (any variant)
- *   - HC-SR04 Ultrasonic Sensor (mounted on ceiling/top fixture)
- *   - 20×4 I2C LCD Display (address 0x27)
- *   - Active Buzzer
- *   (No physical button - measurement is triggered only from the web UI)
- * 
- *  Communication: USB/Serial cable, 115200 baud
- *  Commands from PC/App over Serial (each line ends with '\n'):
- *    NAME:PersonName,Gender
- *    MEASURE
- *  Data sent from ESP32 over Serial:
- *    HEIGHT:123.4       (cm)
- *    ERROR
+ *  ESP32 Serial Firmware v2.0 (with Anti-Noise Debounce)
  * ═══════════════════════════════════════════════════════════════
  */
 
@@ -25,23 +10,18 @@
 #include <LiquidCrystal_I2C.h>
 
 // ─── PIN DEFINITIONS ───────────────────────────────────────────
-#define TRIG_PIN     5      // HC-SR04 Trigger
-#define ECHO_PIN     18     // HC-SR04 Echo
-#define BUZZER_PIN   19     // Active Buzzer
-#define SDA_PIN      21     // I2C SDA
-#define SCL_PIN      22     // I2C SCL
+#define TRIG_PIN     5      
+#define ECHO_PIN     18     
+#define BUZZER_PIN   19     
+#define SDA_PIN      21     
+#define SCL_PIN      22     
 
 // ─── PHYSICAL SETUP ────────────────────────────────────────────
-// The sensor is mounted at ANY height pointing downward.
-// No need to hard-code height — the system auto-calibrates each session:
-//   Phase 1: sensor reads floor distance (area must be CLEAR)  → baseline
-//   Phase 2: person walks under → sensor reads top-of-head distance
-//   Height = baseline − person_distance
-#define NUM_SAMPLES         7      // Readings averaged per measurement
-#define SAMPLE_DELAY_MS    60      // Delay between samples
-#define MAX_VALID_DIST_CM  400.0   // Ignore readings above this
-#define MIN_VALID_DIST_CM   10.0   // Ignore readings below this (noise)
-#define CALIBRATION_SAMPLES 10     // More samples for baseline (accuracy)
+#define NUM_SAMPLES         7      
+#define SAMPLE_DELAY_MS    60      
+#define MAX_VALID_DIST_CM  400.0   
+#define MIN_VALID_DIST_CM   10.0   
+#define CALIBRATION_SAMPLES 10     
 #define CALIBRATION_DELAY_MS 80
 
 // ─── LCD ───────────────────────────────────────────────────────
@@ -61,21 +41,17 @@ State currentState = STATE_IDLE;
 String personName   = "";
 String personGender = "";
 float  lastHeightCM       = 0;
-float  baselineDistanceCM = -1;   // floor distance captured during auto-calibration
-float  defaultDistanceCM  = -1;   // admin-set fixed sensor-to-floor distance (from web UI)
+float  baselineDistanceCM = -1;   
+float  defaultDistanceCM  = -1;   
 unsigned long buzzerEndTime  = 0;
 unsigned long stateEnteredAt = 0;
 bool   buzzerOn      = false;
-bool   measureNow    = false;   // set by Serial MEASURE command from the web UI
+bool   measureNow    = false;   
 
-// Sub-phases inside STATE_MEASURING
-enum MeasurePhase { PHASE_CALIBRATE, PHASE_WAIT_PERSON, PHASE_MEASURE_PERSON };
-MeasurePhase measurePhase = PHASE_CALIBRATE;
-
-String serialBuffer  = "";     // accumulates incoming serial chars until newline
+String serialBuffer  = "";     
 
 // ═══════════════════════════════════════════════════════════════
-//  SERIAL COMMAND HANDLING (replaces BLE command characteristic)
+//  SERIAL COMMAND HANDLING
 // ═══════════════════════════════════════════════════════════════
 void handleSerialCommand(String raw) {
   raw.trim();
@@ -84,8 +60,7 @@ void handleSerialCommand(String raw) {
   Serial.print("[CMD] Received: "); Serial.println(raw);
 
   if (raw.startsWith("NAME:")) {
-    // Format: NAME:PersonName,Gender
-    raw.remove(0, 5);                      // strip "NAME:"
+    raw.remove(0, 5);                      
     int comma = raw.indexOf(',');
     if (comma > 0) {
       personName   = raw.substring(0, comma);
@@ -97,7 +72,6 @@ void handleSerialCommand(String raw) {
     stateEnteredAt = millis();
   }
   else if (raw.startsWith("SETDIST:")) {
-    // Format: SETDIST:240.0  — admin-set fixed sensor-to-floor distance
     float d = raw.substring(8).toFloat();
     if (d >= 30.0 && d <= 500.0) {
       defaultDistanceCM = d;
@@ -115,7 +89,6 @@ void handleSerialCommand(String raw) {
   }
 }
 
-// Call this every loop() to read Serial line-by-line without blocking
 void pollSerialCommands() {
   while (Serial.available() > 0) {
     char c = Serial.read();
@@ -135,7 +108,6 @@ void lcdClear() {
   lcd.clear();
 }
 
-// Print a string left-padded to 20 chars on a given row
 void lcdPrint(uint8_t row, String text, bool center = false) {
   lcd.setCursor(0, row);
   if (center) {
@@ -143,7 +115,6 @@ void lcdPrint(uint8_t row, String text, bool center = false) {
     for (int i = 0; i < pad; i++) lcd.print(' ');
   }
   lcd.print(text.substring(0, min((int)text.length(), 20)));
-  // clear remainder
   int start = center ? ((20 - text.length()) / 2) + text.length() : text.length();
   for (int i = start; i < 20; i++) lcd.print(' ');
 }
@@ -209,20 +180,17 @@ void showLCDResult(float cm, float inch) {
 //  ULTRASONIC MEASUREMENT
 // ═══════════════════════════════════════════════════════════════
 float readRawDistanceCM() {
-  // Send 10µs pulse
   digitalWrite(TRIG_PIN, LOW);
   delayMicroseconds(2);
   digitalWrite(TRIG_PIN, HIGH);
   delayMicroseconds(10);
   digitalWrite(TRIG_PIN, LOW);
 
-  long duration = pulseIn(ECHO_PIN, HIGH, 30000); // 30ms timeout
+  long duration = pulseIn(ECHO_PIN, HIGH, 30000); 
   if (duration == 0) return -1.0;
   return (duration * 0.0343) / 2.0;
 }
 
-// Phase 1: Measure floor/baseline distance (area must be CLEAR)
-// Returns baseline in cm; -1 if failed
 float calibrateBaseline() {
   float readings[CALIBRATION_SAMPLES];
   int validCount = 0;
@@ -237,7 +205,6 @@ float calibrateBaseline() {
 
   if (validCount < 5) return -1.0;
 
-  // Sort and average the middle values
   for (int i = 0; i < validCount - 1; i++)
     for (int j = i + 1; j < validCount; j++)
       if (readings[i] > readings[j]) { float t = readings[i]; readings[i] = readings[j]; readings[j] = t; }
@@ -251,12 +218,10 @@ float calibrateBaseline() {
   Serial.print(baseline, 1);
   Serial.println(" cm");
 
-  if (baseline < 30 || baseline > 400) return -1.0; // sanity
+  if (baseline < 30 || baseline > 400) return -1.0; 
   return baseline;
 }
 
-// Phase 2: Measure person height using saved baseline
-// Returns height in cm; -1 if failed
 float measurePersonHeight() {
   if (baselineDistanceCM < 0) return -1.0;
 
@@ -273,7 +238,6 @@ float measurePersonHeight() {
 
   if (validCount < 3) return -1.0;
 
-  // Sort and take median 3
   for (int i = 0; i < validCount - 1; i++)
     for (int j = i + 1; j < validCount; j++)
       if (readings[i] > readings[j]) { float t = readings[i]; readings[i] = readings[j]; readings[j] = t; }
@@ -281,9 +245,8 @@ float measurePersonHeight() {
   int start = (validCount - 3) / 2;
   float avg = (readings[start] + readings[start + 1] + readings[start + 2]) / 3.0;
 
-  // Height = baseline (floor distance) - person-top distance
   float height = baselineDistanceCM - avg;
-  if (height < 50 || height > 250) return -1.0; // Sanity: 50–250 cm
+  if (height < 50 || height > 250) return -1.0; 
   return height;
 }
 
@@ -308,15 +271,12 @@ void updateBuzzer() {
 // ═══════════════════════════════════════════════════════════════
 void setup() {
   Serial.begin(115200);
-  Serial.println("\n[HMS] CognoSpace Height Measurement System v2.0 (Serial mode)");
 
-  // Pin modes
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
   pinMode(BUZZER_PIN, OUTPUT);
   digitalWrite(BUZZER_PIN, LOW);
 
-  // LCD init
   Wire.begin(SDA_PIN, SCL_PIN);
   lcd.init();
   lcd.backlight();
@@ -325,8 +285,6 @@ void setup() {
   lcdPrint(1, "   Initializing... ", true);
   lcdPrint(2, "   Please wait...  ", true);
   delay(1500);
-
-  Serial.println("[Serial] Ready. Send NAME:Name,Gender then MEASURE");
 
   showLCDIdle();
   currentState = STATE_IDLE;
@@ -337,13 +295,11 @@ void setup() {
 // ═══════════════════════════════════════════════════════════════
 void loop() {
   updateBuzzer();
-  pollSerialCommands();   // replaces BLE onWrite callback
+  pollSerialCommands();   
 
-  // ─── STATE MACHINE ─────────────────────────────────────────
   switch (currentState) {
 
     case STATE_IDLE:
-      // Waiting for NAME command from PC/app over Serial
       break;
 
     case STATE_WELCOME:
@@ -355,7 +311,6 @@ void loop() {
       break;
 
     case STATE_READY:
-      // LCD already showing ready, waiting for Serial MEASURE cmd from web UI
       break;
 
     case STATE_MEASURING: {
@@ -364,15 +319,43 @@ void loop() {
 
         if (defaultDistanceCM > 0) {
           // ── MODE A: Admin has set a fixed default distance ─────────────
-          // Skip floor calibration. Measure raw sensor-to-head distance,
-          // and let the web UI compute height = defaultDistance - rawDist.
           showLCDComeForward();
-          delay(2000); // give person time to step under sensor
+          
+          unsigned long waitStart = millis();
+          bool personDetected = false;
+          int detectCount = 0; // Tracks consecutive positive readings
+          
+          // Wait up to 15 seconds for a person
+          while (millis() - waitStart < 15000) {
+            float currentDist = readRawDistanceCM();
+            
+            // If distance drops >20cm, someone might be there
+            if (currentDist > 0 && currentDist < (defaultDistanceCM - 20.0)) {
+              detectCount++;
+              if (detectCount >= 3) { // Require 3 solid hits in a row (debouncing)
+                personDetected = true;
+                break;
+              }
+            } else {
+              detectCount = 0; // Reset if it was just a random spike
+            }
+            delay(100);
+          }
+
+          if (!personDetected) {
+            lcdClear();
+            lcdPrint(0, "  Timeout...       ", true);
+            lcdPrint(1, "  No person found  ", true);
+            Serial.println("ERROR");
+            delay(3000);
+            currentState = STATE_READY;
+            showLCDReady();
+            break; 
+          }
 
           showLCDMeasuring();
-          delay(500);
+          delay(1500); // give person time to stand still
 
-          // Take raw distance from sensor to top of head
           float readings[NUM_SAMPLES];
           int validCount = 0;
           for (int i = 0; i < NUM_SAMPLES; i++) {
@@ -394,14 +377,12 @@ void loop() {
             currentState = STATE_READY;
             showLCDReady();
           } else {
-            // Sort and take median 3
             for (int i = 0; i < validCount - 1; i++)
               for (int j = i + 1; j < validCount; j++)
                 if (readings[i] > readings[j]) { float t = readings[i]; readings[i] = readings[j]; readings[j] = t; }
             int start = (validCount - 3) / 2;
             float rawDist = (readings[start] + readings[start+1] + readings[start+2]) / 3.0;
 
-            // Compute height locally too (for LCD display)
             float heightCM = defaultDistanceCM - rawDist;
             float heightIN = heightCM / 2.54;
 
@@ -422,7 +403,6 @@ void loop() {
             } else {
               lastHeightCM = heightCM;
               showLCDResult(heightCM, heightIN);
-              // Send raw distance with DIST: prefix — web UI does subtraction
               Serial.print("DIST:");
               Serial.println(String(rawDist, 1));
               startBuzzer(4000);
@@ -448,10 +428,39 @@ void loop() {
             showLCDReady();
           } else {
             showLCDComeForward();
-            delay(4000); // wait for person to walk in
+            
+            unsigned long waitStart = millis();
+            bool personDetected = false;
+            int detectCount = 0; // Tracks consecutive positive readings
+            
+            // Wait up to 15 seconds for a person
+            while (millis() - waitStart < 15000) {
+              float currentDist = readRawDistanceCM();
+              if (currentDist > 0 && currentDist < (baselineDistanceCM - 20.0)) {
+                detectCount++;
+                if (detectCount >= 3) { // Require 3 solid hits
+                  personDetected = true;
+                  break;
+                }
+              } else {
+                detectCount = 0; // Reset if it was a noise spike
+              }
+              delay(100);
+            }
+
+            if (!personDetected) {
+              lcdClear();
+              lcdPrint(0, "  Timeout...       ", true);
+              lcdPrint(1, "  No person found  ", true);
+              Serial.println("ERROR");
+              delay(3000);
+              currentState = STATE_READY;
+              showLCDReady();
+              break; 
+            }
 
             showLCDMeasuring();
-            delay(500);
+            delay(1500); // give person time to stand still
 
             float heightCM = measurePersonHeight();
 
@@ -469,7 +478,6 @@ void loop() {
               lastHeightCM = heightCM;
               float heightIN = heightCM / 2.54;
               showLCDResult(heightCM, heightIN);
-              // Send plain number (legacy auto-calibrated height)
               Serial.println(String(heightCM, 1));
               startBuzzer(4000);
               currentState = STATE_RESULT;
@@ -482,7 +490,6 @@ void loop() {
     }
 
     case STATE_RESULT:
-      // Stay on result screen for 8 seconds, then return to idle
       if (millis() - stateEnteredAt > 8000) {
         personName   = "";
         personGender = "";
@@ -494,83 +501,3 @@ void loop() {
 
   delay(20);
 }
-
-/*
- * ═══════════════════════════════════════════════════════════════
- *  WIRING GUIDE
- * ═══════════════════════════════════════════════════════════════
- *
- *  HC-SR04 Ultrasonic Sensor (mounted on ceiling/top beam)
- *  ┌──────┬──────────┐
- *  │ VCC  │  3.3V    │
- *  │ GND  │  GND     │
- *  │ TRIG │  GPIO 5  │
- *  │ ECHO │  GPIO 18 │  ← Use a 1kΩ + 2kΩ voltage divider if using 5V HC-SR04
- *  └──────┴──────────┘
- *
- *  20×4 I2C LCD Display
- *  ┌──────┬──────────┐
- *  │ VCC  │  5V      │
- *  │ GND  │  GND     │
- *  │ SDA  │  GPIO 21 │
- *  │ SCL  │  GPIO 22 │
- *  └──────┴──────────┘
- *  Note: I2C address is 0x27 (change in code if yours is 0x3F)
- *
- *  Active Buzzer
- *  ┌──────┬──────────┐
- *  │ +    │  GPIO 19 │  (with 100Ω series resistor)
- *  │ -    │  GND     │
- *  └──────┴──────────┘
- *
- *  (No physical button needed - "Start Measuring" in the web UI
- *   sends the MEASURE command over serial to trigger a reading)
- *
- * ═══════════════════════════════════════════════════════════════
- *  SERIAL PROTOCOL (replaces BLE)
- * ═══════════════════════════════════════════════════════════════
- *  Connect ESP32 via USB cable. Open Serial Monitor / your PC app
- *  at 115200 baud, line ending = Newline ("\n").
- *
- *  Commands you send TO the ESP32 (one per line):
- *    NAME:John,Male        -> sets name/gender, shows welcome screen
- *    SETDIST:240.0          -> sets the fixed sensor-to-floor default distance (cm)
- *                             When set, calibration phase is skipped.
- *    MEASURE                -> triggers a measurement
- *
- *  Data the ESP32 sends back:
- *    [CMD] Received: ...    -> debug echo of your command
- *    DIST:72.3              -> raw sensor-to-head distance (cm); only when SETDIST was used.
- *                             Web UI computes: height = defaultDist - DIST value
- *    123.4                  -> computed height in cm (plain); only in auto-calibration mode
- *    ERROR                  -> measurement failed, try again
- *    [HMS] ...              -> human-readable debug log lines
- *
- *  On your PC side (Python example):
- *    import serial
- *    ser = serial.Serial('COM5', 115200, timeout=2)  # adjust port
- *    ser.write(b"NAME:John,Male\n")
- *    ser.write(b"MEASURE\n")
- *    line = ser.readline().decode().strip()
- *
- * ═══════════════════════════════════════════════════════════════
- *  CALIBRATION
- * ═══════════════════════════════════════════════════════════════
- *  1. Mount sensor firmly on ceiling or overhead fixture
- *  2. Measure exact vertical distance from floor to sensor face
- *  3. Set CEILING_HEIGHT_CM to that value (e.g., 240.0 for 2.4m room)
- *  4. Upload firmware and open Serial Monitor at 115200 baud
- *  5. Place a known-height object (e.g., 170cm stick) under sensor
- *  6. Verify reading matches; adjust CEILING_HEIGHT_CM if needed
- *
- * ═══════════════════════════════════════════════════════════════
- *  REQUIRED LIBRARIES (install via Arduino Library Manager)
- * ═══════════════════════════════════════════════════════════════
- *  - LiquidCrystal I2C  (by Frank de Brabander)
- *  - No BLE libraries needed anymore (Serial is built-in)
- *
- *  Arduino IDE Board: "ESP32 Dev Module"
- *  Upload Speed: 921600
- *  Flash Frequency: 80MHz
- * ═══════════════════════════════════════════════════════════════
- */
