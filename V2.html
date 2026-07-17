@@ -212,11 +212,10 @@ footer .f-sub{color:rgba(255,255,255,0.6);font-size:.78rem}
 
 <!-- NAVBAR -->
 <nav class="navbar">
-  <a class="navbar-brand" href="https://www.cognospace.in" target="_blank" rel="noopener" style="text-decoration:none;cursor:pointer;">
-    <img src="cognospace-logo.png" alt="CognoSpace" class="navbar-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
-    <div class="navbar-logo-placeholder" style="display:none"><i class="fas fa-ruler-vertical"></i></div>
+  <div class="navbar-brand">
+    <div class="navbar-logo-placeholder"><i class="fas fa-ruler-vertical"></i></div>
     CognoSpace HMS
-  </a>
+  </div>
   <div class="navbar-right">
     <div class="ble-status" id="navBleStatus">
       <div class="ble-dot" id="navBleDot"></div>
@@ -233,10 +232,8 @@ footer .f-sub{color:rgba(255,255,255,0.6);font-size:.78rem}
     <h1 class="landing-title">Height Measurement<br>System</h1>
     <p class="landing-sub">Precision anthropometric measurement powered by ESP32 & ultrasonic sensing</p>
     <p class="landing-by">By</p>
-    <a href="https://www.cognospace.in" target="_blank" rel="noopener" style="display:block;margin:0 auto">
-      <img src="cognospace-logo.png" alt="CognoSpace" class="landing-logo" onerror="this.style.display='none';document.getElementById('logoFallback').style.display='block'"/>
-    </a>
-    <div id="logoFallback" style="display:none;font-family:'Poppins',sans-serif;font-weight:900;font-size:1.8rem;color:var(--blue);margin:12px 0 40px;letter-spacing:1px"><a href="https://www.cognospace.in" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:none">CognoSpace</a></div>
+    <img src="cognospace-logo.png" alt="CognoSpace" class="landing-logo" onerror="this.style.display='none';document.getElementById('logoFallback').style.display='block'"/>
+    <div id="logoFallback" style="display:none;font-family:'Poppins',sans-serif;font-weight:900;font-size:1.8rem;color:var(--blue);margin:12px 0 40px;letter-spacing:1px">CognoSpace</div>
     <div class="login-cards">
       <div class="login-card admin-card" onclick="openAdminLogin()">
         <div class="login-card-icon"><i class="fas fa-user-shield"></i></div>
@@ -280,8 +277,7 @@ footer .f-sub{color:rgba(255,255,255,0.6);font-size:.78rem}
     <button class="btn btn-primary btn-sm" id="btnBleConnect" onclick="connectSerial()"><i class="fas fa-plug"></i> Connect Device</button>
     <button class="btn btn-coral btn-sm hidden" id="btnBleDisconnect" onclick="disconnectSerial()"><i class="fas fa-times"></i> Disconnect</button>
     <div class="spacer"></div>
-    <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
-    <button class="btn btn-coral btn-sm" onclick="exportAdminPDF()"><i class="fas fa-file-pdf"></i> Export PDF</button>
+    <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
   </div>
 
   <!-- Data Table -->
@@ -363,7 +359,7 @@ footer .f-sub{color:rgba(255,255,255,0.6);font-size:.78rem}
       <div class="metric-box"><div class="metric-label">Gender</div><div class="metric-val" id="userGender" style="font-size:1.1rem">—</div></div>
     </div>
     <div style="color:var(--text-soft);font-size:.78rem;text-align:center;margin-bottom:16px" id="userDate">Measured on —</div>
-    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="downloadUserPDF()"><i class="fas fa-file-pdf"></i> Download My Report (PDF)</button>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="downloadReport()"><i class="fas fa-file-download"></i> Download My Report</button>
   </div>
 </div>
 
@@ -417,27 +413,24 @@ footer .f-sub{color:rgba(255,255,255,0.6);font-size:.78rem}
       <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="gotoStep2()"><i class="fas fa-arrow-right"></i> Continue</button>
     </div>
 
-    <!-- Step 2: Calibrate + Ready to Measure -->
+    <!-- Step 2: Ready to Measure -->
     <div class="popup-step" id="step2">
-      <div class="modal-title">📡 Calibrate &amp; Measure</div>
-      <div class="modal-sub">Keep area clear, then ask the person to step in</div>
+      <div class="modal-title">📏 Ready to Measure</div>
+      <div class="modal-sub">Ask the person to stand under the sensor</div>
       <div class="lcd-preview" id="lcdPreview2">
         <div class="lcd-row">┌──────────────────┐</div>
         <div class="lcd-row">│ Welcome,         │</div>
-        <div class="lcd-row">│ <span id="lcdName">--------</span>      │</div>
+        <div class="lcd-row">│ <span id="lcdName">--------</span> │</div>
         <div class="lcd-row">└──────────────────┘</div>
       </div>
-      <div style="background:var(--blue-light);border:1px solid var(--blue);border-radius:10px;padding:14px 16px;margin:12px 0;font-size:.88rem;color:#1E3A8A">
-        <i class="fas fa-info-circle" style="color:var(--blue)"></i> <strong>Step 1 — Calibrate:</strong> Make sure <u>nobody is under the sensor</u>. Click <strong>Measure</strong> — the sensor will calculate the floor distance first. The LCD will show <em>"Wait, Calculating…"</em>
-      </div>
-      <div style="background:var(--amber-light);border:1px solid var(--amber);border-radius:10px;padding:14px 16px;margin:8px 0 12px;font-size:.88rem;color:#92400E">
-        <i class="fas fa-walking" style="color:var(--amber)"></i> <strong>Step 2 — Person walks in:</strong> Once LCD shows <em>"Come Forward"</em>, ask the person to stand directly under the sensor upright, without shoes.
+      <div style="background:var(--amber-light);border:1px solid var(--amber);border-radius:10px;padding:14px 16px;margin:12px 0;font-size:.88rem;color:#92400E">
+        <i class="fas fa-info-circle" style="color:var(--amber)"></i> <strong>Instructions:</strong> Ask the person to stand upright directly under the ultrasonic sensor. Ensure they remove shoes and head accessories.
       </div>
       <div class="lcd-preview" id="lcdReady">
-        <div class="lcd-row">│ Wait, Calculating│</div>
-        <div class="lcd-row">│ Floor distance...│</div>
-        <div class="lcd-row">│ Please wait      │</div>
-        <div class="lcd-row">│                  │</div>
+        <div class="lcd-row">│ Please stand     │</div>
+        <div class="lcd-row">│ under sensor...  │</div>
+        <div class="lcd-row">│ Press button to  │</div>
+        <div class="lcd-row">│ START            │</div>
       </div>
       <button class="btn btn-mint" style="width:100%;justify-content:center;margin-top:8px" onclick="startMeasuring()"><i class="fas fa-play"></i> Start Measurement</button>
     </div>
@@ -466,8 +459,8 @@ footer .f-sub{color:rgba(255,255,255,0.6);font-size:.78rem}
 
 <!-- ════ FOOTER ════ -->
 <footer>
-  <div class="f-logo"><a href="https://www.cognospace.in" target="_blank" rel="noopener" style="color:#fff;text-decoration:none">CognoSpace</a></div>
-  <div class="f-sub">Designed &amp; Developed by <strong style="color:rgba(255,255,255,.9)"><a href="https://www.cognospace.in" target="_blank" rel="noopener" style="color:rgba(255,255,255,.9);text-decoration:none">CognoSpace</a></strong> · Height Measurement System · Powered by ESP32 USB Serial</div>
+  <div class="f-logo">CognoSpace</div>
+  <div class="f-sub">Designed & Developed by <strong style="color:rgba(255,255,255,.9)">CognoSpace</strong> · Height Measurement System · Powered by ESP32 USB Serial</div>
 </footer>
 
 <!-- ════ FIREBASE + APP LOGIC ════ -->
@@ -887,108 +880,32 @@ async function lookupUser(){
   document.getElementById('userResult').classList.remove('hidden');
   window._currentUserRecord=r;
 }
-function buildUserReportHTML(r){
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>HMS Report - ${r.name}</title>
-<style>
-@media print{body{margin:0}}
-body{font-family:Arial,sans-serif;max-width:620px;margin:40px auto;padding:28px;color:#1E293B}
-.header{background:linear-gradient(135deg,#1A73E8,#0D47A1);color:#fff;padding:32px 28px;border-radius:14px;text-align:center;margin-bottom:28px}
-.header h1{margin:0 0 6px;font-size:1.7rem;letter-spacing:.5px}
-.header p{margin:4px 0;opacity:.8;font-size:.9rem}
-.uid{display:inline-block;background:rgba(255,255,255,.2);padding:5px 18px;border-radius:20px;font-size:.85rem;margin-top:10px;letter-spacing:1px}
-.big-height{text-align:center;padding:22px 0 10px}
-.big-height .num{font-size:4rem;font-weight:900;color:#1A73E8;line-height:1}
-.big-height .sub{color:#64748B;font-size:1rem;margin-top:4px}
-.row{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #E2EAF4}
-.row:last-child{border-bottom:none}
-.label{color:#64748B;font-size:.85rem}
-.value{font-weight:700;font-size:.95rem}
-.footer{text-align:center;color:#94A3B8;font-size:.75rem;margin-top:36px;padding-top:16px;border-top:1px solid #E2EAF4}
-.footer a{color:#1A73E8;text-decoration:none}
-.badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:.82rem;font-weight:700;background:#F3F0FF;color:#7C3AED}
+function downloadReport(){
+  const r=window._currentUserRecord;
+  if(!r) return;
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>HMS Report - ${r.name}</title>
+<style>body{font-family:Arial,sans-serif;max-width:600px;margin:40px auto;padding:20px;color:#1E293B}
+.header{background:linear-gradient(135deg,#1A73E8,#0D47A1);color:#fff;padding:28px;border-radius:12px;text-align:center;margin-bottom:24px}
+.header h1{margin:0;font-size:1.6rem}.header p{margin:4px 0;opacity:.8;font-size:.9rem}
+.uid{display:inline-block;background:rgba(255,255,255,.2);padding:4px 14px;border-radius:20px;font-size:.85rem;margin-top:8px}
+.row{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #E2EAF4}
+.label{color:#64748B;font-size:.85rem}.value{font-weight:700}
+.footer{text-align:center;color:#94A3B8;font-size:.78rem;margin-top:32px}
 </style></head><body>
-<div class="header">
-  <h1>Height Measurement Report</h1>
-  <p>CognoSpace Height Measurement System</p>
-  <div class="uid">${r.id}</div>
-</div>
-<div class="big-height">
-  <div class="num">${r.height_cm} <span style="font-size:1.8rem;color:#64748B">cm</span></div>
-  <div class="sub">${r.height_in} inches</div>
-</div>
+<div class="header"><h1>Height Measurement Report</h1><p>CognoSpace Height Measurement System</p><div class="uid">${r.id}</div></div>
 <div class="row"><span class="label">Full Name</span><span class="value">${r.name}</span></div>
-<div class="row"><span class="label">Gender</span><span class="value"><span class="badge">${r.gender}</span></span></div>
+<div class="row"><span class="label">Gender</span><span class="value">${r.gender}</span></div>
 <div class="row"><span class="label">Height (cm)</span><span class="value">${r.height_cm} cm</span></div>
 <div class="row"><span class="label">Height (inches)</span><span class="value">${r.height_in} in</span></div>
 <div class="row"><span class="label">Unique ID</span><span class="value">${r.id}</span></div>
 <div class="row"><span class="label">Measured On</span><span class="value">${r.timestamp}</span></div>
-<div class="footer">Designed &amp; Developed by <a href="https://www.cognospace.in" target="_blank">CognoSpace</a> &middot; Height Measurement System</div>
+<div class="footer">Designed & Developed by CognoSpace · Height Measurement System</div>
 </body></html>`;
-}
-
-function downloadUserPDF(){
-  const r=window._currentUserRecord;
-  if(!r) return;
-  const html=buildUserReportHTML(r);
-  const win=window.open('','_blank');
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  setTimeout(()=>{ win.print(); },600);
-  toast('Report opened for printing/saving as PDF!','success');
-}
-
-function exportAdminPDF(){
-  if(!allRecords.length){toast('No records to export','error');return;}
-  const rows=allRecords.map((r,i)=>`
-    <tr>
-      <td>${i+1}</td>
-      <td><b>${r.id}</b></td>
-      <td>${r.name}</td>
-      <td>${r.gender}</td>
-      <td>${r.height_cm} cm</td>
-      <td>${r.height_in} in</td>
-      <td style="font-size:.8rem;color:#64748B">${r.timestamp}</td>
-    </tr>`).join('');
-  const avgH=allRecords.length?(allRecords.reduce((s,r)=>s+r.height_cm,0)/allRecords.length).toFixed(1):'—';
-  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>HMS Records Report</title>
-<style>
-@media print{body{margin:0}}
-body{font-family:Arial,sans-serif;margin:32px;color:#1E293B}
-.header{background:linear-gradient(135deg,#1A73E8,#0D47A1);color:#fff;padding:24px 28px;border-radius:12px;margin-bottom:24px}
-.header h1{margin:0 0 4px;font-size:1.5rem}.header p{margin:0;opacity:.8;font-size:.88rem}
-.stats{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
-.stat{background:#F0F7FF;border-radius:10px;padding:14px 20px;min-width:120px;text-align:center}
-.stat .sv{font-size:1.6rem;font-weight:900;color:#1A73E8}.stat .sl{font-size:.75rem;color:#64748B;margin-top:2px}
-table{width:100%;border-collapse:collapse;font-size:.85rem}
-thead th{background:#1A73E8;color:#fff;padding:10px 12px;text-align:left}
-tbody tr:nth-child(even){background:#F8FAFF}
-tbody td{padding:9px 12px;border-bottom:1px solid #E2EAF4}
-.footer{text-align:center;color:#94A3B8;font-size:.75rem;margin-top:28px}
-.footer a{color:#1A73E8}
-</style></head><body>
-<div class="header">
-  <h1>HMS Records Report</h1>
-  <p>CognoSpace Height Measurement System &mdash; Generated on ${new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})}</p>
-</div>
-<div class="stats">
-  <div class="stat"><div class="sv">${allRecords.length}</div><div class="sl">Total Records</div></div>
-  <div class="stat"><div class="sv">${avgH}</div><div class="sl">Avg Height (cm)</div></div>
-  <div class="stat"><div class="sv">${allRecords.filter(r=>r.gender==='Male').length}</div><div class="sl">Male</div></div>
-  <div class="stat"><div class="sv">${allRecords.filter(r=>r.gender==='Female').length}</div><div class="sl">Female</div></div>
-</div>
-<table>
-  <thead><tr><th>#</th><th>ID</th><th>Name</th><th>Gender</th><th>Height (cm)</th><th>Height (in)</th><th>Timestamp</th></tr></thead>
-  <tbody>${rows}</tbody>
-</table>
-<div class="footer">Designed &amp; Developed by <a href="https://www.cognospace.in" target="_blank">CognoSpace</a> &middot; Height Measurement System</div>
-</body></html>`;
-  const win=window.open('','_blank');
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  setTimeout(()=>{ win.print(); },600);
-  toast('Admin PDF report opened for printing!','success');
+  const a=document.createElement('a');
+  a.href='data:text/html;charset=utf-8,'+encodeURIComponent(html);
+  a.download='HMS_Report_'+r.id+'.html';
+  a.click();
+  toast('Report downloaded!','success');
 }
 </script>
 </body>
