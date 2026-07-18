@@ -408,24 +408,8 @@ input[type=number]{-moz-appearance:textfield}
   .navbar-brand img{height:26px!important}
   .navbar-brand > div > span:first-child{font-size:.7rem!important}
 }
-/* ── User Lookup Search Animation ── */
-.search-state{display:none;flex-direction:column;align-items:center;justify-content:center;padding:28px 0 12px;gap:12px}
-.search-state.active{display:flex}
-.search-radar{position:relative;width:72px;height:72px}
-.search-radar-ring{position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:var(--mint);border-right-color:var(--mint);animation:spin 1s linear infinite}
-.search-radar-ring:nth-child(2){inset:10px;border-top-color:var(--blue);border-right-color:var(--blue);animation-duration:.7s;animation-direction:reverse}
-.search-radar-dot{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px}
-.search-dots{display:flex;gap:5px;margin-top:4px}
-.search-dots span{width:7px;height:7px;border-radius:50%;background:var(--mint);animation:search-bounce .9s ease-in-out infinite}
-.search-dots span:nth-child(2){animation-delay:.15s;background:var(--blue)}
-.search-dots span:nth-child(3){animation-delay:.3s;background:var(--purple)}
-.search-label{font-family:'Poppins',sans-serif;font-size:.9rem;font-weight:600;color:var(--text-soft)}
-.search-id-echo{font-family:'Poppins',sans-serif;font-size:.78rem;color:var(--blue);font-weight:700;background:var(--blue-light);padding:3px 12px;border-radius:20px;letter-spacing:1px}
-@keyframes search-bounce{0%,80%,100%{transform:scale(0.6);opacity:.4}40%{transform:scale(1.1);opacity:1}}
-@keyframes input-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
-.input-shake{animation:input-shake .4s ease}
-.btn-finding{pointer-events:none;opacity:.8}
 </style>
+</head>
 <body>
 
 <!-- NAVBAR -->
@@ -575,19 +559,8 @@ input[type=number]{-moz-appearance:textfield}
     <h3 style="font-family:'Poppins',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:8px">Enter Your Unique ID</h3>
     <p style="color:var(--text-soft);font-size:.85rem;margin-bottom:18px">Your ID was provided at the time of measurement</p>
     <div style="display:flex;gap:8px;max-width:360px;margin:0 auto;width:100%">
-      <input type="text" id="userIdInput" placeholder="e.g. HMS0001" style="flex:1;padding:12px 16px;border:2px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s" onkeydown="if(event.key==='Enter')lookupUser()"/>
-      <button class="btn btn-mint" id="findBtn" onclick="lookupUser()"><i class="fas fa-search" id="findBtnIcon"></i> <span id="findBtnText">Find</span></button>
-    </div>
-    <!-- Search animation state -->
-    <div class="search-state" id="searchState">
-      <div class="search-radar">
-        <div class="search-radar-ring"></div>
-        <div class="search-radar-ring"></div>
-        <div class="search-radar-dot">🔍</div>
-      </div>
-      <div class="search-label">Searching records...</div>
-      <div class="search-id-echo" id="searchIdEcho">HMS0001</div>
-      <div class="search-dots"><span></span><span></span><span></span></div>
+      <input type="text" id="userIdInput" placeholder="e.g. HMS-0001" style="flex:1;padding:12px 16px;border:2px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:.95rem;outline:none" onkeydown="if(event.key==='Enter')lookupUser()"/>
+      <button class="btn btn-mint" onclick="lookupUser()"><i class="fas fa-search"></i> Find</button>
     </div>
   </div>
 
@@ -595,7 +568,7 @@ input[type=number]{-moz-appearance:textfield}
     <div class="user-result-header">
       <div class="user-avatar" id="userAvatar">?</div>
       <div class="user-result-name" id="userResultName">—</div>
-      <div class="user-uid-tag" id="userResultUID">HMS???</div>
+      <div class="user-uid-tag" id="userResultUID">HMS-????</div>
     </div>
     <div class="height-visual" id="heightVisual">
       <div class="height-fill" id="heightFill" style="height:30%"></div>
@@ -998,7 +971,7 @@ function showHeightResult(cm){
 async function saveRecord(){
   if(!currentMeasuredHeight){toast('No measurement taken','error');return;}
   const records=await loadAllRecords();
-  const uid='HMS'+String(records.length+1).padStart(4,'0');
+  const uid='HMS-'+String(records.length+1).padStart(4,'0');
   const record={
     id:uid, name:currentName, gender:currentGender,
     height_cm:+currentMeasuredHeight.toFixed(1),
@@ -1209,70 +1182,23 @@ function answerQuery(q){
 
 // ── User Lookup ──
 async function lookupUser(){
-  const input = document.getElementById('userIdInput');
-  const uid = input.value.trim().toUpperCase();
-  if(!uid){
-    input.classList.add('input-shake');
-    input.style.borderColor='var(--coral)';
-    setTimeout(()=>{ input.classList.remove('input-shake'); input.style.borderColor='var(--border)'; },500);
-    toast('Enter your unique ID','error');
-    return;
-  }
-
-  // Show searching state
-  const findBtn = document.getElementById('findBtn');
-  const searchState = document.getElementById('searchState');
-  const inputRow = input.parentElement;
-  document.getElementById('searchIdEcho').textContent = uid;
-  findBtn.classList.add('btn-finding');
-  document.getElementById('findBtnIcon').className = 'fas fa-circle-notch fa-spin';
-  document.getElementById('findBtnText').textContent = 'Searching...';
-  searchState.classList.add('active');
-  document.getElementById('userResult').classList.add('hidden');
-  input.style.borderColor = 'var(--blue)';
-
-  try {
-    const snap = await db.ref('heights/'+uid).once('value');
-    const r = snap.val();
-
-    // Hide search state
-    searchState.classList.remove('active');
-    findBtn.classList.remove('btn-finding');
-    document.getElementById('findBtnIcon').className = 'fas fa-search';
-    document.getElementById('findBtnText').textContent = 'Find';
-
-    if(!r){
-      input.style.borderColor = 'var(--coral)';
-      input.classList.add('input-shake');
-      setTimeout(()=>{ input.classList.remove('input-shake'); input.style.borderColor='var(--border)'; },500);
-      toast('ID not found. Please check and try again.','error');
-      return;
-    }
-
-    input.style.borderColor = 'var(--mint)';
-    setTimeout(()=>{ input.style.borderColor='var(--border)'; },1500);
-
-    document.getElementById('userAvatar').textContent=r.name[0].toUpperCase();
-    document.getElementById('userResultName').textContent=r.name;
-    document.getElementById('userResultUID').textContent=r.id;
-    document.getElementById('userHcm').textContent=r.height_cm+' cm';
-    document.getElementById('userHin').textContent=r.height_ft || cmToFeet(r.height_cm);
-    document.getElementById('userGender').textContent=r.gender;
-    document.getElementById('userDate').textContent='Measured on '+r.timestamp;
-    document.getElementById('heightCmLarge').textContent=r.height_cm;
-    const pct=Math.min(100,Math.max(20,((r.height_cm-100)/120)*100));
-    document.getElementById('heightFill').style.height=pct+'%';
-    document.getElementById('userResult').classList.remove('hidden');
-    window._currentUserRecord=r;
-
-  } catch(e) {
-    searchState.classList.remove('active');
-    findBtn.classList.remove('btn-finding');
-    document.getElementById('findBtnIcon').className = 'fas fa-search';
-    document.getElementById('findBtnText').textContent = 'Find';
-    input.style.borderColor = 'var(--border)';
-    toast('Error fetching record. Check connection.','error');
-  }
+  const uid=document.getElementById('userIdInput').value.trim().toUpperCase();
+  if(!uid){toast('Enter your unique ID','error');return;}
+  const snap=await db.ref('heights/'+uid).once('value');
+  const r=snap.val();
+  if(!r){toast('ID not found. Please check and try again.','error');return;}
+  document.getElementById('userAvatar').textContent=r.name[0].toUpperCase();
+  document.getElementById('userResultName').textContent=r.name;
+  document.getElementById('userResultUID').textContent=r.id;
+  document.getElementById('userHcm').textContent=r.height_cm+' cm';
+  document.getElementById('userHin').textContent=r.height_ft || cmToFeet(r.height_cm);
+  document.getElementById('userGender').textContent=r.gender;
+  document.getElementById('userDate').textContent='Measured on '+r.timestamp;
+  document.getElementById('heightCmLarge').textContent=r.height_cm;
+  const pct=Math.min(100,Math.max(20,((r.height_cm-100)/120)*100));
+  document.getElementById('heightFill').style.height=pct+'%';
+  document.getElementById('userResult').classList.remove('hidden');
+  window._currentUserRecord=r;
 }
 function buildUserReportHTML(r){
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>HMS Report - ${r.name}</title>
