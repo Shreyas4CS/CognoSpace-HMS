@@ -254,159 +254,13 @@ input[type=number]{-moz-appearance:textfield}
 #deleteConfirmModal .modal{max-width:360px;text-align:center}
 .delete-icon{font-size:2.5rem;color:var(--coral);margin-bottom:12px}
 
-/* ══════════════════════════════════════
-   RESPONSIVE — Tablet (≤1024px)
-══════════════════════════════════════ */
-@media(max-width:1024px){
-  .navbar{padding:0 20px;height:60px}
-  #adminDash{padding:20px 20px 60px}
-  .stat-grid{grid-template-columns:repeat(2,1fr);gap:12px}
-  .charts-grid{grid-template-columns:1fr 1fr}
-  .dash-header{gap:10px}
-  .dash-header > div:last-child{flex-wrap:wrap;gap:8px}
-  .actions-bar{gap:8px;padding:12px 16px}
-  .actions-bar > div[style*="amber"]{flex-wrap:wrap}
-}
-
-/* ══════════════════════════════════════
-   RESPONSIVE — Phone (≤640px)
-══════════════════════════════════════ */
-@media(max-width:640px){
-
-  /* ── Navbar ── */
-  .navbar{padding:0 14px;height:auto;min-height:56px;flex-wrap:nowrap;gap:8px}
-  .navbar-brand{gap:8px}
-  .navbar-brand > div > span:first-child{font-size:.78rem!important}
-  .navbar-brand > div > span:last-child span{font-size:.65rem!important}
-  .navbar-brand img{height:32px!important}
-  .navbar-right{gap:6px;flex-shrink:0}
-  .ble-status{display:none}                /* hide USB status text on mobile */
-  .btn-nav,.btn-nav-user{padding:5px 10px;font-size:.72rem;border-radius:14px}
-
-  /* ── Landing ── */
-  #landingPage{padding:28px 16px;align-items:flex-start;padding-top:40px}
-  .landing-title{font-size:1.9rem}
-  .landing-sub{font-size:.92rem}
-  .landing-logo{height:44px}
-  .login-cards{grid-template-columns:1fr;gap:14px}
-  .login-card{padding:22px 18px}
-  .login-card-icon{width:52px;height:52px;font-size:22px;border-radius:14px}
-
-  /* ── Admin dash ── */
-  #adminDash{padding:16px 14px 60px}
-  .dash-title{font-size:1.25rem}
-  .dash-header{flex-direction:column;align-items:flex-start;margin-bottom:18px}
-  .dash-header > div:last-child{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .dash-header > div:last-child .btn{width:100%;justify-content:center;padding:10px 12px;font-size:.8rem}
-  .stat-grid{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
-  .stat-card{padding:16px 14px}
-  .stat-value{font-size:1.6rem}
-  .stat-label{font-size:.7rem}
-
-  /* ── Actions bar ── */
-  .actions-bar{flex-direction:column;align-items:stretch;padding:12px 14px;gap:10px}
-  .actions-bar > *{width:100%}
-  .ble-badge{justify-content:center}
-  .spacer{display:none}
-  /* sensor row */
-  .actions-bar > div[style*="amber"]{flex-wrap:wrap;gap:8px;justify-content:space-between}
-  .btn-sensor-save{flex:1}
-  /* export buttons: side by side */
-  .actions-bar > .btn-ghost,
-  .actions-bar > .btn-coral{flex:1;justify-content:center;font-size:.8rem;padding:9px 10px}
-
-  /* ── Table ── */
-  .table-card{padding:16px 12px}
-  .table-card-header{flex-direction:column;align-items:flex-start;gap:8px}
-  .search-box{width:100%}
-  .search-box input{width:100%}
-  /* hide less critical columns on mobile */
-  table thead th:nth-child(6),
-  table tbody td:nth-child(6){display:none}   /* height ft col — still shown */
-  table thead th:nth-child(7),
-  table tbody td:nth-child(7){display:none}   /* timestamp */
-  table thead th:first-child,
-  table tbody td:first-child{display:none}    /* # */
-  thead th{padding:8px 8px;font-size:.68rem}
-  tbody td{padding:10px 8px;font-size:.8rem}
-  .uid-badge{font-size:.68rem;padding:2px 6px}
-  .height-mini-bar{display:none}
-  .btn-delete-row{padding:3px 7px;font-size:.7rem}
-
-  /* ── Charts ── */
-  .charts-grid{grid-template-columns:1fr;gap:14px}
-  .chart-card{padding:16px}
-
-  /* ── Modal ── */
-  .modal{padding:24px 18px;border-radius:18px;max-width:100%!important}
-  .modal-title{font-size:1.15rem}
-  .lcd-preview{font-size:.72rem;padding:12px 10px;letter-spacing:1px}
-
-  /* ── USER DASHBOARD ── */
-  #userDash{
-    padding:20px 14px 60px;
-    max-width:100%;
-    width:100%;
-  }
-  #userDash > div:first-child > div:first-child{font-size:1.4rem}
-
-  .user-lookup{padding:24px 18px}
-  .user-lookup-icon{width:56px;height:56px;font-size:24px;border-radius:14px}
-
-  /* ID input + button: stacked on very small, side-by-side otherwise */
-  #userDash .user-lookup > div[style*="flex"]{
-    flex-direction:column;
-    max-width:100%!important;
-    gap:10px
-  }
-  #userDash .user-lookup input{
-    width:100%;
-    font-size:.9rem;
-    padding:13px 14px
-  }
-  #userDash .user-lookup .btn{
-    width:100%;
-    justify-content:center;
-    padding:13px 14px
-  }
-
-  .user-result-card{padding:20px 16px}
-  .user-avatar{width:64px;height:64px;font-size:1.6rem}
-  .user-result-name{font-size:1.3rem}
-
-  .height-visual{padding:16px 14px}
-  .height-visual-text{font-size:2.2rem}
-  .height-visual-unit{font-size:1rem}
-
-  .result-metrics{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
-  .metric-box{padding:14px 10px}
-  .metric-val{font-size:1.3rem}
-  .metric-label{font-size:.68rem}
-
-  /* Download button full width */
-  #userDash .btn-primary{width:100%;justify-content:center;font-size:.88rem}
-
-  /* ── Footer ── */
-  footer{padding:18px 14px;font-size:.78rem}
-  footer .f-sub{font-size:.7rem}
-
-  /* ── Toast ── */
-  .toast{bottom:16px;right:14px;left:14px;max-width:none;font-size:.82rem}
-
-  /* ── Chatbot ── */
-  .chatbot-card{padding:16px}
-  .chat-window{height:200px}
-}
-
-/* ══════════════════════════════════════
-   RESPONSIVE — Very small (≤380px)
-══════════════════════════════════════ */
-@media(max-width:380px){
-  .landing-title{font-size:1.6rem}
+@media(max-width:768px){
   .stat-grid{grid-template-columns:1fr 1fr}
+  .charts-grid{grid-template-columns:1fr}
+  .login-cards{grid-template-columns:1fr}
+  .landing-title{font-size:2.2rem}
   .result-metrics{grid-template-columns:1fr 1fr}
-  .navbar-brand img{height:26px!important}
-  .navbar-brand > div > span:first-child{font-size:.7rem!important}
+  .navbar{padding:0 16px}
 }
 </style>
 </head>
@@ -510,7 +364,7 @@ input[type=number]{-moz-appearance:textfield}
     </div>
     <div class="table-wrap">
       <table id="dataTable">
-        <thead><tr><th>#</th><th>Unique ID</th><th>Name</th><th>Gender</th><th>Height (cm)</th><th>Height (ft)</th><th>Timestamp</th><th>Action</th></tr></thead>
+        <thead><tr><th>#</th><th>Unique ID</th><th>Name</th><th>Gender</th><th>Height (cm)</th><th>Height (in)</th><th>Timestamp</th><th>Action</th></tr></thead>
         <tbody id="tableBody"><tr><td colspan="8" style="text-align:center;color:var(--text-soft);padding:32px">No records yet. Click "Check Person Height" to begin.</td></tr></tbody>
       </table>
     </div>
@@ -558,7 +412,7 @@ input[type=number]{-moz-appearance:textfield}
     <div class="user-lookup-icon"><i class="fas fa-id-card"></i></div>
     <h3 style="font-family:'Poppins',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:8px">Enter Your Unique ID</h3>
     <p style="color:var(--text-soft);font-size:.85rem;margin-bottom:18px">Your ID was provided at the time of measurement</p>
-    <div style="display:flex;gap:8px;max-width:360px;margin:0 auto;width:100%">
+    <div style="display:flex;gap:8px;max-width:360px;margin:0 auto">
       <input type="text" id="userIdInput" placeholder="e.g. HMS-0001" style="flex:1;padding:12px 16px;border:2px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:.95rem;outline:none" onkeydown="if(event.key==='Enter')lookupUser()"/>
       <button class="btn btn-mint" onclick="lookupUser()"><i class="fas fa-search"></i> Find</button>
     </div>
@@ -577,7 +431,7 @@ input[type=number]{-moz-appearance:textfield}
     </div>
     <div class="result-metrics">
       <div class="metric-box"><div class="metric-label">Height (cm)</div><div class="metric-val" id="userHcm">—</div></div>
-      <div class="metric-box"><div class="metric-label">Height (ft)</div><div class="metric-val" id="userHin" style="color:var(--mint)">—</div></div>
+      <div class="metric-box"><div class="metric-label">Height (in)</div><div class="metric-val" id="userHin" style="color:var(--mint)">—</div></div>
       <div class="metric-box"><div class="metric-label">Gender</div><div class="metric-val" id="userGender" style="font-size:1.1rem">—</div></div>
     </div>
     <div style="color:var(--text-soft);font-size:.78rem;text-align:center;margin-bottom:16px" id="userDate">Measured on —</div>
@@ -949,20 +803,14 @@ function startMeasuring(){
     },2800);
   }
 }
-function cmToFeet(cm){
-  const totalInches = cm / 2.54;
-  const ft = Math.floor(totalInches / 12);
-  const inch = Math.round(totalInches % 12);
-  return `${ft}'${inch}"`;
-}
 function showHeightResult(cm){
-  const ftVal=cmToFeet(cm);
+  const inVal=(cm/2.54).toFixed(1);
   document.getElementById('measuringAnim').classList.add('hidden');
   document.getElementById('resultDiv').classList.remove('hidden');
   document.getElementById('resultCm').textContent=cm.toFixed(1)+' cm';
-  document.getElementById('resultIn').textContent=ftVal;
+  document.getElementById('resultIn').textContent=inVal+' inches';
   document.getElementById('lcdCm').textContent=cm.toFixed(1);
-  document.getElementById('lcdIn').textContent=ftVal;
+  document.getElementById('lcdIn').textContent=inVal;
   // Animate buzzer icon for 4s
   const bz=document.getElementById('buzzerIcon');
   bz.style.display='inline-block';
@@ -975,7 +823,7 @@ async function saveRecord(){
   const record={
     id:uid, name:currentName, gender:currentGender,
     height_cm:+currentMeasuredHeight.toFixed(1),
-    height_ft:cmToFeet(currentMeasuredHeight),
+    height_in:+(currentMeasuredHeight/2.54).toFixed(1),
     timestamp:new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})
   };
   await db.ref('heights/'+uid).set(record);
@@ -1015,7 +863,7 @@ function renderTable(records){
       <td><strong>${r.name}</strong></td>
       <td><span class="badge-gender ${gc}">${r.gender}</span></td>
       <td><div class="height-bar-cell"><div class="height-mini-bar" style="width:${pct*0.8}px"></div><strong>${r.height_cm}</strong></div></td>
-      <td>${r.height_ft || cmToFeet(r.height_cm)}</td>
+      <td>${r.height_in}</td>
       <td style="color:var(--text-soft);font-size:.8rem">${r.timestamp}</td>
       <td><button class="btn-delete-row" onclick="confirmDelete('${r.id}','${r.name}')"><i class="fas fa-trash-alt"></i> Delete</button></td>
     </tr>`;
@@ -1051,8 +899,8 @@ async function deleteRecord(id){
 }
 function exportCSV(){
   if(!allRecords.length){toast('No records to export','error');return;}
-  const h=['ID','Name','Gender','Height(cm)','Height(ft)','Timestamp'];
-  const rows=allRecords.map(r=>[r.id,r.name,r.gender,r.height_cm,r.height_ft||cmToFeet(r.height_cm),r.timestamp]);
+  const h=['ID','Name','Gender','Height(cm)','Height(in)','Timestamp'];
+  const rows=allRecords.map(r=>[r.id,r.name,r.gender,r.height_cm,r.height_in,r.timestamp]);
   const csv=[h,...rows].map(r=>r.join(',')).join('\n');
   const a=document.createElement('a');
   a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
@@ -1191,7 +1039,7 @@ async function lookupUser(){
   document.getElementById('userResultName').textContent=r.name;
   document.getElementById('userResultUID').textContent=r.id;
   document.getElementById('userHcm').textContent=r.height_cm+' cm';
-  document.getElementById('userHin').textContent=r.height_ft || cmToFeet(r.height_cm);
+  document.getElementById('userHin').textContent=r.height_in+' in';
   document.getElementById('userGender').textContent=r.gender;
   document.getElementById('userDate').textContent='Measured on '+r.timestamp;
   document.getElementById('heightCmLarge').textContent=r.height_cm;
@@ -1228,12 +1076,12 @@ body{font-family:Arial,sans-serif;max-width:620px;margin:40px auto;padding:28px;
 </div>
 <div class="big-height">
   <div class="num">${r.height_cm} <span style="font-size:1.8rem;color:#64748B">cm</span></div>
-  <div class="sub">${r.height_ft || cmToFeet(r.height_cm)}</div>
+  <div class="sub">${r.height_in} inches</div>
 </div>
 <div class="row"><span class="label">Full Name</span><span class="value">${r.name}</span></div>
 <div class="row"><span class="label">Gender</span><span class="value"><span class="badge">${r.gender}</span></span></div>
 <div class="row"><span class="label">Height (cm)</span><span class="value">${r.height_cm} cm</span></div>
-<div class="row"><span class="label">Height (ft)</span><span class="value">${r.height_ft || cmToFeet(r.height_cm)}</span></div>
+<div class="row"><span class="label">Height (inches)</span><span class="value">${r.height_in} in</span></div>
 <div class="row"><span class="label">Unique ID</span><span class="value">${r.id}</span></div>
 <div class="row"><span class="label">Measured On</span><span class="value">${r.timestamp}</span></div>
 <div class="footer">Designed &amp; Developed by <a href="https://www.cognospace.in" target="_blank">CognoSpace</a> &middot; Height Measurement System</div>
@@ -1261,7 +1109,7 @@ function exportAdminPDF(){
       <td>${r.name}</td>
       <td>${r.gender}</td>
       <td>${r.height_cm} cm</td>
-      <td>${r.height_ft || cmToFeet(r.height_cm)}</td>
+      <td>${r.height_in} in</td>
       <td style="font-size:.8rem;color:#64748B">${r.timestamp}</td>
     </tr>`).join('');
   const avgH=allRecords.length?(allRecords.reduce((s,r)=>s+r.height_cm,0)/allRecords.length).toFixed(1):'—';
@@ -1293,7 +1141,7 @@ tbody td{padding:9px 12px;border-bottom:1px solid #E2EAF4}
   <div class="stat"><div class="sv">${allRecords.filter(r=>r.gender==='Female').length}</div><div class="sl">Female</div></div>
 </div>
 <table>
-  <thead><tr><th>#</th><th>ID</th><th>Name</th><th>Gender</th><th>Height (cm)</th><th>Height (ft)</th><th>Timestamp</th></tr></thead>
+  <thead><tr><th>#</th><th>ID</th><th>Name</th><th>Gender</th><th>Height (cm)</th><th>Height (in)</th><th>Timestamp</th></tr></thead>
   <tbody>${rows}</tbody>
 </table>
 <div class="footer">Designed &amp; Developed by <a href="https://www.cognospace.in" target="_blank">CognoSpace</a> &middot; </div>
