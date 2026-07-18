@@ -554,9 +554,9 @@ input[type=number]{-moz-appearance:textfield}
 
 <!-- ════ FOOTER ════ -->
 <footer>
-  <img src="cognospace-logo.png" alt="CognoSpace" style="height:36px;object-fit:contain;margin-bottom:8px;filter:brightness(0) invert(1);opacity:.85" onerror="this.style.display='none'"/>
-  <div class="f-logo"><a href="https://www.cognospace.in" target="_blank" rel="noopener" style="color:#fff;text-decoration:none">CognoSpace</a></div>
-  <div class="f-sub">Designed &amp; Developed by <strong style="color:rgba(255,255,255,.9)"><a href="https://www.cognospace.in" target="_blank" rel="noopener" style="color:rgba(255,255,255,.9);text-decoration:none">CognoSpace</a></strong> · Height Measurement System · Powered by ESP32 USB Serial</div>
+  <img src="cognospace_logo.png" alt="CognoSpace" style="height:36px;object-fit:contain;margin-bottom:8px;filter:brightness(0) invert(1);opacity:.85" onerror="this.style.display='none'"/>
+  <div class="f-logo"><a href="https://www.cognospace.in" target="_blank" rel="noopener" style="color:#fff;text-decoration:none"></a></div>
+  <div class="f-sub">Designed &amp; Developed by <strong style="color:rgba(255,255,255,.9)"><a href="https://www.cognospace.in" target="_blank" rel="noopener" style="color:rgba(255,255,255,.9);text-decoration:none">CognoSpace</a></strong></div>
 </footer>
 
 <!-- ════ FIREBASE + APP LOGIC ════ -->
@@ -1144,12 +1144,12 @@ tbody td{padding:9px 12px;border-bottom:1px solid #E2EAF4}
   <thead><tr><th>#</th><th>ID</th><th>Name</th><th>Gender</th><th>Height (cm)</th><th>Height (in)</th><th>Timestamp</th></tr></thead>
   <tbody>${rows}</tbody>
 </table>
-<div class="footer">Designed &amp; Developed by <a href="https://www.cognospace.in" target="_blank">CognoSpace</a> &middot; Height Measurement System</div>
+<div class="footer">Designed &amp; Developed by <a href="https://www.cognospace.in" target="_blank">CognoSpace</a> &middot; </div>
 </body></html>`;
   const win=window.open('','_blank');
   win.document.write(html);
   win.document.close();
-  win.focus();
+  win.focus()
   setTimeout(()=>{ win.print(); },600);
   toast('Admin PDF report opened for printing!','success');
 }
