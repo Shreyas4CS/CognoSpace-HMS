@@ -198,62 +198,6 @@ footer .f-sub{color:rgba(255,255,255,0.6);font-size:.78rem}
 .toast.error{border-left:4px solid var(--coral)}
 .toast.info{border-left:4px solid var(--blue)}
 
-/* ── Remove number input spinners ── */
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-input[type=number]{-moz-appearance:textfield}
-
-/* ── Sensor Save Button ── */
-.btn-sensor-save{background:linear-gradient(135deg,#FFB300,#E69500);color:#fff;border:none;padding:6px 14px;border-radius:7px;font-family:'Poppins',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap}
-.btn-sensor-save:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,179,0,.4)}
-.btn-sensor-save:active{transform:scale(.97)}
-
-/* ── Delete button in table ── */
-.btn-delete-row{background:var(--coral-light);color:var(--coral);border:1.5px solid var(--coral);border-radius:7px;padding:4px 10px;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .18s;font-family:'Poppins',sans-serif}
-.btn-delete-row:hover{background:var(--coral);color:#fff;transform:scale(1.05)}
-
-/* ── Enhanced landing animations ── */
-@keyframes fade-up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-@keyframes fade-in{from{opacity:0}to{opacity:1}}
-@keyframes slide-in-left{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:none}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
-@keyframes count-up{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
-
-.landing-inner .landing-badge{animation:fade-up .5s ease both}
-.landing-inner .landing-title{animation:fade-up .6s .1s ease both}
-.landing-inner .landing-sub{animation:fade-up .6s .2s ease both}
-.landing-inner .landing-by{animation:fade-up .6s .3s ease both}
-.landing-inner .landing-logo{animation:fade-up .6s .35s ease both}
-.login-card:nth-child(1){animation:fade-up .6s .45s ease both}
-.login-card:nth-child(2){animation:fade-up .6s .55s ease both}
-
-.login-card{transition:all .28s cubic-bezier(.34,1.56,.64,1)}
-.login-card:hover{transform:translateY(-6px) scale(1.025)}
-.login-card-icon{transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
-.login-card:hover .login-card-icon{transform:scale(1.12) rotate(-3deg)}
-
-.stat-card{transition:transform .22s,box-shadow .22s;animation:fade-up .5s ease both}
-.stat-card:nth-child(1){animation-delay:.05s}
-.stat-card:nth-child(2){animation-delay:.12s}
-.stat-card:nth-child(3){animation-delay:.19s}
-.stat-card:nth-child(4){animation-delay:.26s}
-.stat-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(26,115,232,.18)}
-
-.stat-value{animation:count-up .4s .3s ease both}
-
-.navbar{animation:fade-in .4s ease both}
-.navbar-brand img{transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
-.navbar-brand:hover img{transform:scale(1.08) rotate(-2deg)}
-
-/* User nav button in admin */
-.btn-nav-user{background:rgba(0,200,150,.25);border:1px solid rgba(0,200,150,.5);color:#fff;padding:7px 18px;border-radius:20px;font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:.2s}
-.btn-nav-user:hover{background:rgba(0,200,150,.45)}
-
-/* Confirm delete modal */
-#deleteConfirmModal .modal{max-width:360px;text-align:center}
-.delete-icon{font-size:2.5rem;color:var(--coral);margin-bottom:12px}
-
 @media(max-width:768px){
   .stat-grid{grid-template-columns:1fr 1fr}
   .charts-grid{grid-template-columns:1fr}
@@ -268,22 +212,16 @@ input[type=number]{-moz-appearance:textfield}
 
 <!-- NAVBAR -->
 <nav class="navbar">
-  <a class="navbar-brand" href="https://www.cognospace.in" target="_blank" rel="noopener" style="text-decoration:none;cursor:pointer;display:flex;align-items:center;gap:16px">
-    <div style="display:flex;flex-direction:column;gap:2px;line-height:1">
-      <span style="font-family:'Poppins',sans-serif;font-size:.95rem;font-weight:700;color:#fff;letter-spacing:.2px">Height Measurement System</span>
-      <span style="display:flex;align-items:center;gap:5px">
-        <span style="font-size:.68rem;color:rgba(255,255,255,.65);font-weight:400;font-family:'Inter',sans-serif"></span>
-        <span style="font-family:'Poppins',sans-serif;font-size:.75rem;font-weight:700;color:rgba(255,255,255,.85)"></span>
-      </span>
-    </div>
-    <img src="cognospace_logo.png" alt="CognoSpace" style="height:46px;width:auto;object-fit:contain;border-radius:0" onerror="this.style.display='none'"/>
+  <a class="navbar-brand" href="https://www.cognospace.in" target="_blank" rel="noopener" style="text-decoration:none;cursor:pointer;">
+    <img src="cognospace-logo.png" alt="CognoSpace" class="navbar-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+    <div class="navbar-logo-placeholder" style="display:none"><i class="fas fa-ruler-vertical"></i></div>
+    CognoSpace HMS
   </a>
   <div class="navbar-right">
     <div class="ble-status" id="navBleStatus">
       <div class="ble-dot" id="navBleDot"></div>
       <span id="navBleText">USB Not Connected</span>
     </div>
-    <button class="btn-nav-user hidden" id="navUserBtn" onclick="goToUserLogin()"><i class="fas fa-user"></i> User Login</button>
     <button class="btn-nav hidden" id="navLogout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </div>
 </nav>
@@ -344,11 +282,10 @@ input[type=number]{-moz-appearance:textfield}
     <!-- Sensor Default Distance -->
     <div style="display:flex;align-items:center;gap:8px;background:var(--amber-light);border:1.5px solid var(--amber);border-radius:10px;padding:7px 14px">
       <i class="fas fa-ruler-vertical" style="color:var(--amber);font-size:15px"></i>
-      <label style="font-size:.8rem;font-weight:700;color:#92400E;white-space:nowrap">Sensor Distance (cm)</label>
+      <label style="font-size:.8rem;font-weight:700;color:#92400E;white-space:nowrap">Set Sensor Default Distance (cm)</label>
       <input type="number" id="sensorDefaultDist" min="50" max="500" step="0.5" placeholder="e.g. 240"
         style="width:90px;padding:5px 10px;border:1.5px solid var(--amber);border-radius:7px;font-family:'Inter',sans-serif;font-size:.88rem;outline:none;background:#fff;color:var(--text)"
-        onkeydown="if(event.key==='Enter')saveSensorDefault()" title="Enter the fixed distance from sensor to floor (cm)"/>
-      <button class="btn-sensor-save" onclick="saveSensorDefault()"><i class="fas fa-save"></i> Save</button>
+        oninput="saveSensorDefault()" title="Enter the fixed distance from sensor to floor (cm)"/>
       <span id="sensorDefaultStatus" style="font-size:.75rem;color:#92400E;font-weight:600"></span>
     </div>
     <div class="spacer"></div>
@@ -364,8 +301,8 @@ input[type=number]{-moz-appearance:textfield}
     </div>
     <div class="table-wrap">
       <table id="dataTable">
-        <thead><tr><th>#</th><th>Unique ID</th><th>Name</th><th>Gender</th><th>Height (cm)</th><th>Height (in)</th><th>Timestamp</th><th>Action</th></tr></thead>
-        <tbody id="tableBody"><tr><td colspan="8" style="text-align:center;color:var(--text-soft);padding:32px">No records yet. Click "Check Person Height" to begin.</td></tr></tbody>
+        <thead><tr><th>#</th><th>Unique ID</th><th>Name</th><th>Gender</th><th>Height (cm)</th><th>Height (in)</th><th>Timestamp</th></tr></thead>
+        <tbody id="tableBody"><tr><td colspan="7" style="text-align:center;color:var(--text-soft);padding:32px">No records yet. Click "Check Person Height" to begin.</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -539,22 +476,8 @@ input[type=number]{-moz-appearance:textfield}
   </div>
 </div>
 
-<!-- Delete Confirm Modal -->
-<div class="modal-backdrop hidden" id="deleteConfirmModal">
-  <div class="modal" style="position:relative;text-align:center">
-    <div class="delete-icon"><i class="fas fa-trash-alt"></i></div>
-    <div class="modal-title" style="color:var(--coral)">Delete Record?</div>
-    <div class="modal-sub" id="deleteConfirmSub">This action cannot be undone.</div>
-    <div style="display:flex;gap:12px;margin-top:20px">
-      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeModal('deleteConfirmModal')">Cancel</button>
-      <button class="btn btn-coral" style="flex:1;justify-content:center" id="deleteConfirmBtn"><i class="fas fa-trash"></i> Delete</button>
-    </div>
-  </div>
-</div>
-
 <!-- ════ FOOTER ════ -->
 <footer>
-  <img src="cognospace-logo.png" alt="CognoSpace" style="height:36px;object-fit:contain;margin-bottom:8px;filter:brightness(0) invert(1);opacity:.85" onerror="this.style.display='none'"/>
   <div class="f-logo"><a href="https://www.cognospace.in" target="_blank" rel="noopener" style="color:#fff;text-decoration:none">CognoSpace</a></div>
   <div class="f-sub">Designed &amp; Developed by <strong style="color:rgba(255,255,255,.9)"><a href="https://www.cognospace.in" target="_blank" rel="noopener" style="color:rgba(255,255,255,.9);text-decoration:none">CognoSpace</a></strong> · Height Measurement System · Powered by ESP32 USB Serial</div>
 </footer>
@@ -638,7 +561,6 @@ function showAdminDash(){
   document.getElementById('userDash').style.display='none';
   document.getElementById('adminDash').style.display='block';
   document.getElementById('navLogout').classList.remove('hidden');
-  document.getElementById('navUserBtn').classList.remove('hidden');
   loadRecords();
   toast('Welcome, Admin!','success');
 }
@@ -647,17 +569,12 @@ function showUserDash(){
   document.getElementById('adminDash').style.display='none';
   document.getElementById('userDash').style.display='block';
   document.getElementById('navLogout').classList.remove('hidden');
-  document.getElementById('navUserBtn').classList.add('hidden');
-}
-function goToUserLogin(){
-  showUserDash();
 }
 function logout(){
   document.getElementById('landingPage').style.display='flex';
   document.getElementById('adminDash').style.display='none';
   document.getElementById('userDash').style.display='none';
   document.getElementById('navLogout').classList.add('hidden');
-  document.getElementById('navUserBtn').classList.add('hidden');
   document.getElementById('userResult').classList.add('hidden');
 }
 
@@ -850,7 +767,7 @@ function loadRecords(){
 function renderTable(records){
   const tbody=document.getElementById('tableBody');
   if(!records.length){
-    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text-soft);padding:32px">No records yet.</td></tr>';
+    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text-soft);padding:32px">No records yet.</td></tr>';
     return;
   }
   const maxH=Math.max(...records.map(r=>r.height_cm));
@@ -865,7 +782,6 @@ function renderTable(records){
       <td><div class="height-bar-cell"><div class="height-mini-bar" style="width:${pct*0.8}px"></div><strong>${r.height_cm}</strong></div></td>
       <td>${r.height_in}</td>
       <td style="color:var(--text-soft);font-size:.8rem">${r.timestamp}</td>
-      <td><button class="btn-delete-row" onclick="confirmDelete('${r.id}','${r.name}')"><i class="fas fa-trash-alt"></i> Delete</button></td>
     </tr>`;
   }).join('');
 }
@@ -882,20 +798,6 @@ function filterTable(){
   const q=document.getElementById('searchInput').value.toLowerCase();
   const filtered=allRecords.filter(r=>r.name.toLowerCase().includes(q)||r.id.toLowerCase().includes(q));
   renderTable(filtered);
-}
-function confirmDelete(id, name){
-  document.getElementById('deleteConfirmSub').innerHTML=`Delete record for <strong>${name}</strong> (${id})?<br><span style="font-size:.8rem;color:var(--coral)">This action cannot be undone.</span>`;
-  document.getElementById('deleteConfirmBtn').onclick=()=>deleteRecord(id);
-  openModal('deleteConfirmModal');
-}
-async function deleteRecord(id){
-  try{
-    await db.ref('heights/'+id).remove();
-    closeModal('deleteConfirmModal');
-    toast('Record '+id+' deleted','success');
-  } catch(e){
-    toast('Error deleting record: '+e.message,'error');
-  }
 }
 function exportCSV(){
   if(!allRecords.length){toast('No records to export','error');return;}
@@ -1069,7 +971,6 @@ body{font-family:Arial,sans-serif;max-width:620px;margin:40px auto;padding:28px;
 .badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:.82rem;font-weight:700;background:#F3F0FF;color:#7C3AED}
 </style></head><body>
 <div class="header">
-  <img src="https://www.cognospace.in/wp-content/uploads/2023/07/logo.png" alt="CognoSpace" style="height:44px;object-fit:contain;margin-bottom:12px;filter:brightness(0) invert(1)" onerror="this.style.display='none'"/>
   <h1>Height Measurement Report</h1>
   <p>CognoSpace Height Measurement System</p>
   <div class="uid">${r.id}</div>
@@ -1130,7 +1031,6 @@ tbody td{padding:9px 12px;border-bottom:1px solid #E2EAF4}
 .footer a{color:#1A73E8}
 </style></head><body>
 <div class="header">
-  <img src="https://www.cognospace.in/wp-content/uploads/2023/07/logo.png" alt="CognoSpace" style="height:38px;object-fit:contain;margin-bottom:10px;filter:brightness(0) invert(1)" onerror="this.style.display='none'"/>
   <h1>HMS Records Report</h1>
   <p>CognoSpace Height Measurement System &mdash; Generated on ${new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})}</p>
 </div>
